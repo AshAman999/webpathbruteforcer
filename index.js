@@ -2,7 +2,7 @@ import inquirer from "inquirer";
 import figlet from "figlet";
 import gradient from "gradient-string";
 import fs from "fs";
-import makeHttpRequest from "./requestmaking.js";
+import { makeHttpRequest, createFile } from "./requestmaking.js";
 
 import async from "async";
 console.clear();
@@ -36,30 +36,30 @@ if (questionType.attack_type === "Single Url") {
       await makeHttpRequest(url, line);
     });
   } catch (err) {
-    console.error(err);
+    // console.error("Some error occured while reading the file");
   }
   ////////////////////////////
 } else {
   let urllist = [];
   let urli = "";
   let urli2 = {};
-  while (urli2.url !== "q" || urli2.url !== "") {
+  while (urli2.url !== "q") {
     urli2 = await inquirer.prompt({
       name: "url",
       type: "text",
       message:
         "Enter your Url's one by one and press enter to add another url or press q to finish",
     });
-    if (urli2.url !== "q" || urli2 !== "") {
+    if (urli2.url !== "q" && urli2 !== "") {
       urllist.push(urli2.url);
-    }
-    if (urllist.length == 0) {
-      console.log("No url's provided, quitting the program");
-      //quit the program
-      process.exit(code);
     }
   }
 
+  if (urllist.length == 0) {
+    console.log("No url's provided, quitting the program");
+    //quit the program
+    process.exit(code);
+  }
   const filei = await inquirer.prompt({
     name: "file",
     type: "text",
@@ -69,6 +69,9 @@ if (questionType.attack_type === "Single Url") {
   const filePath = filei.file;
   try {
     urllist.forEach(async (url) => {
+      let domain = new URL(url);
+      domain = domain.hostname.replace("www.,com", "");
+      await createFile(domain);
       const data = fs.readFileSync(filePath, "utf8");
       data.split(/\r?\n/).forEach(async (line) => {
         async.parallel({
@@ -76,7 +79,7 @@ if (questionType.attack_type === "Single Url") {
             makeHttpRequest(url, line);
           },
           catch(e) {
-            console.log("Problem in parallel callback");
+            // console.log("Problem in parallel callback");
           },
         });
       });
