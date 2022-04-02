@@ -1,8 +1,8 @@
 import inquirer from "inquirer";
 
-async function askStatuscode(){
-    let statusCodeList = [];
-    let statusCode = {};
+async function askStatuscode() {
+  let statusCodeList = [];
+  let statusCode = {};
   while (statusCode.statusCode !== "q") {
     statusCode = await inquirer.prompt({
       name: "statusCode",
@@ -13,6 +13,7 @@ async function askStatuscode(){
     if (statusCode.statusCode !== "q" && statusCode !== "") {
       statusCodeList.push(statusCode.statusCode);
     }
+    console.clear();
   }
   return statusCodeList;
 }

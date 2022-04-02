@@ -13,6 +13,7 @@ async function askUrlList() {
     if (url.url !== "q" && url !== "") {
       urlList.push(url.url);
     }
+    console.clear();
   }
   return urlList;
 }
