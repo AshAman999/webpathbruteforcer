@@ -10,7 +10,7 @@ async function makeHttpRequest(url, param, statusCodeList) {
         // 200
         statusCodeList.forEach((element) => {
           if (element == resp.statusCode) {
-            write(url, param, domain);
+            write(url, param, domain, element);
           }
         });
       })
@@ -29,11 +29,11 @@ async function createFile(domain) {
   logger.write("The followring url was found out there in the web: \n\n");
 }
 
-function write(url, param, domain) {
+function write(url, param, domain, statusCode) {
   var logger = fs.createWriteStream(`${domain}.txt`, {
     flags: "a",
   });
-  logger.write(`${url}${param}\n`);
+  logger.write(`${url}${param} |||| returned ${statusCode}\n`);
 }
 //export all the modules
 export { makeHttpRequest, createFile };

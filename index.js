@@ -22,6 +22,28 @@ if (questionType.attack_type === "Single Url") {
     type: "input",
     message: "Enter your Url",
   });
+
+  let statusCodeList = [];
+
+  let statusCode = {};
+  while (statusCode.statusCode !== "q") {
+    statusCode = await inquirer.prompt({
+      name: "statusCode",
+      type: "text",
+      message:
+        "Enter status code to consider valid press enter to add another url or press q to finish",
+    });
+    if (statusCode.statusCode !== "q" && statusCode !== "") {
+      statusCodeList.push(statusCode.statusCode);
+    }
+  }
+
+  if (statusCodeList.length == 0) {
+    console.log("No Status Codeprovided provided, quitting the program");
+    //quit the program
+    process.exit(code);
+  }
+
   const url = urli.url;
   const filei = await inquirer.prompt({
     name: "file",
@@ -31,9 +53,12 @@ if (questionType.attack_type === "Single Url") {
   const filePath = filei.file;
 
   try {
+    let domain = new URL(url);
+    domain = domain.hostname.replace("www.,com", "");
+    await createFile(domain);
     const data = fs.readFileSync(filePath, "utf8");
     data.split(/\r?\n/).forEach(async (line) => {
-      await makeHttpRequest(url, line);
+      makeHttpRequest(url, line, statusCodeList);
     });
   } catch (err) {
     // console.error("Some error occured while reading the file");
@@ -112,3 +137,7 @@ if (questionType.attack_type === "Single Url") {
 
 const used = process.memoryUsage().heapUsed / 1024 / 1024;
 console.log(`The script uses approximately ${Math.round(used * 100) / 100} MB`);
+const cpu = process.cpuUsage();
+console.log(
+  `The script uses approximately ${Math.round(cpu.user / 100) / 100} % CPU`
+);
