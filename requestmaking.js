@@ -1,18 +1,18 @@
 import https from "https";
 import fs from "fs";
 
-async function makeHttpRequest(url, param) {
+async function makeHttpRequest(url, param, statusCodeList) {
   try {
     let domain = new URL(url);
     domain = domain.hostname.replace("www.,com", "");
     await https
       .get(`${url}${param}`, (resp) => {
-        if (resp.statusCode === 200 || resp.statusCode == 302) {
-          write(url, param,domain);
-        } // 200
-        else {
-          // console.log(`Nothing found for ${url}${param}`);
-        }
+        // 200
+        statusCodeList.forEach((element) => {
+          if (element == resp.statusCode) {
+            write(url, param, domain);
+          }
+        });
       })
       .on("error", (err) => {
         // console.log("Something went wrong while makin api call: ");
@@ -22,7 +22,6 @@ async function makeHttpRequest(url, param) {
   }
 }
 
-
 async function createFile(domain) {
   var logger = await fs.createWriteStream(`${domain}.txt`, {
     flags: "a",
@@ -30,7 +29,7 @@ async function createFile(domain) {
   logger.write("The followring url was found out there in the web: \n\n");
 }
 
-function write(url, param,domain) {
+function write(url, param, domain) {
   var logger = fs.createWriteStream(`${domain}.txt`, {
     flags: "a",
   });
@@ -38,4 +37,3 @@ function write(url, param,domain) {
 }
 //export all the modules
 export { makeHttpRequest, createFile };
-

@@ -60,6 +60,29 @@ if (questionType.attack_type === "Single Url") {
     //quit the program
     process.exit(code);
   }
+  /////////////////
+
+  let statusCodeList = [];
+
+  let statusCode = {};
+  while (statusCode.statusCode !== "q") {
+    statusCode = await inquirer.prompt({
+      name: "statusCode",
+      type: "text",
+      message:
+        "Enter status code to consider valid press enter to add another url or press q to finish",
+    });
+    if (statusCode.statusCode !== "q" && statusCode !== "") {
+      statusCodeList.push(statusCode.statusCode);
+    }
+  }
+
+  if (statusCodeList.length == 0) {
+    console.log("No Status Codeprovided provided, quitting the program");
+    //quit the program
+    process.exit(code);
+  }
+
   const filei = await inquirer.prompt({
     name: "file",
     type: "text",
@@ -76,7 +99,7 @@ if (questionType.attack_type === "Single Url") {
       data.split(/\r?\n/).forEach(async (line) => {
         async.parallel({
           try(callback) {
-            makeHttpRequest(url, line);
+            makeHttpRequest(url, line, statusCodeList);
           },
           catch(e) {
             // console.log("Problem in parallel callback");
