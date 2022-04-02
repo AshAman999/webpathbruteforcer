@@ -8,11 +8,15 @@ async function makeHttpRequest(url, param, statusCodeList) {
     await https
       .get(`${url}${param}`, (resp) => {
         // 200
-        statusCodeList.forEach((element) => {
-          if (element == resp.statusCode) {
-            write(url, param, domain, element);
-          }
-        });
+        if (statusCodeList.length === 1) {
+          write(url, param, domain, statusCodeList[0]);
+        } else {
+          statusCodeList.forEach((element) => {
+            if (element == resp.statusCode) {
+              write(url, param, domain, element);
+            }
+          });
+        }
       })
       .on("error", (err) => {
         // console.log("Something went wrong while makin api call: ");
@@ -33,7 +37,7 @@ function write(url, param, domain, statusCode) {
   var logger = fs.createWriteStream(`${domain}.txt`, {
     flags: "a",
   });
-  logger.write(`${url}${param} |||| returned ${statusCode}\n`);
+  logger.write(`${url}${param} == returned ${statusCode}\n`);
 }
 //export all the modules
 export { makeHttpRequest, createFile };

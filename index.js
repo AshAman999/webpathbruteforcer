@@ -5,81 +5,43 @@ import fs from "fs";
 import { makeHttpRequest, createFile } from "./requestmaking.js";
 
 import async from "async";
+import { askInputType } from "./userinput/userinput.js";
+import { askSingleUrl } from "./userinput/askSingleUrl.js";
+import { askStatuscode } from "./userinput/askStatusCodeList.js";
+import { askFilePath } from "./userinput/askFilePath.js";
+import { askUrlList } from "./userinput/askUrlList.js";
+
 console.clear();
 console.log(gradient.pastel.multiline(figlet.textSync("Bruteforce Attacker")));
 
-const questionType = await inquirer.prompt({
-  name: "attack_type",
-  type: "list",
-  message: "Chose attack type",
-  choices: ["Single Url", "List of Urls"],
-});
-console.clear();
+const questionType = await askInputType();
 
 if (questionType.attack_type === "Single Url") {
-  const urli = await inquirer.prompt({
-    name: "url",
-    type: "input",
-    message: "Enter your Url",
-  });
-
-  let statusCodeList = [];
-
-  let statusCode = {};
-  while (statusCode.statusCode !== "q") {
-    statusCode = await inquirer.prompt({
-      name: "statusCode",
-      type: "text",
-      message:
-        "Enter status code to consider valid press enter to add another url or press q to finish",
-    });
-    if (statusCode.statusCode !== "q" && statusCode !== "") {
-      statusCodeList.push(statusCode.statusCode);
-    }
-  }
+  const url = await askSingleUrl();
+  let statusCodeList = await askStatuscode();
 
   if (statusCodeList.length == 0) {
     console.log("No Status Codeprovided provided, quitting the program");
     //quit the program
     process.exit(code);
   }
-
-  const url = urli.url;
-  const filei = await inquirer.prompt({
-    name: "file",
-    type: "input",
-    message: "Enter your file path or drag the file into the terminal",
-  });
-  const filePath = filei.file;
+  const filePath = await askFilePath();
 
   try {
-    let domain = new URL(url);
+    let domain = new URL(url.url);
+    console.log(url.url);
     domain = domain.hostname.replace("www.,com", "");
     await createFile(domain);
     const data = fs.readFileSync(filePath, "utf8");
     data.split(/\r?\n/).forEach(async (line) => {
-      makeHttpRequest(url, line, statusCodeList);
+      await makeHttpRequest(url.url, line, statusCodeList);
     });
   } catch (err) {
-    // console.error("Some error occured while reading the file");
+    console.error(err);
   }
   ////////////////////////////
 } else {
-  let urllist = [];
-  let urli = "";
-  let urli2 = {};
-  while (urli2.url !== "q") {
-    urli2 = await inquirer.prompt({
-      name: "url",
-      type: "text",
-      message:
-        "Enter your Url's one by one and press enter to add another url or press q to finish",
-    });
-    if (urli2.url !== "q" && urli2 !== "") {
-      urllist.push(urli2.url);
-    }
-  }
-
+  let urllist = await askUrlList();
   if (urllist.length == 0) {
     console.log("No url's provided, quitting the program");
     //quit the program
@@ -87,20 +49,7 @@ if (questionType.attack_type === "Single Url") {
   }
   /////////////////
 
-  let statusCodeList = [];
-
-  let statusCode = {};
-  while (statusCode.statusCode !== "q") {
-    statusCode = await inquirer.prompt({
-      name: "statusCode",
-      type: "text",
-      message:
-        "Enter status code to consider valid press enter to add another url or press q to finish",
-    });
-    if (statusCode.statusCode !== "q" && statusCode !== "") {
-      statusCodeList.push(statusCode.statusCode);
-    }
-  }
+  let statusCodeList = askStatuscode();
 
   if (statusCodeList.length == 0) {
     console.log("No Status Codeprovided provided, quitting the program");
@@ -108,13 +57,7 @@ if (questionType.attack_type === "Single Url") {
     process.exit(code);
   }
 
-  const filei = await inquirer.prompt({
-    name: "file",
-    type: "text",
-    message: "Enter your file path or drag the file into the terminal",
-  });
-
-  const filePath = filei.file;
+  const filePath = askFilePath();
   try {
     urllist.forEach(async (url) => {
       let domain = new URL(url);
