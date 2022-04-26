@@ -1,4 +1,5 @@
 # webpathbruteforcer
+## Task for cloudseko
 - `git clone https://github.com/AshAman999/webpathbruteforcer`
 - first install the dependencies by running `npm i`
 - then run `npm start`
